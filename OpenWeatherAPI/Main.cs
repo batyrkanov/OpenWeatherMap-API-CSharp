@@ -9,61 +9,33 @@ namespace OpenWeatherAPI
 {
     public class Main
     {
-        private TemperatureObj temp;
-        private double pressure, humidity, sea_level, grnd_level;
+        private const string Temp = "temp";
+        private const string TempMin = "temp_min";
+        private const string TempMax = "temp_max";
+        private const string PressureSelector = "pressure";
+        private const string HumiditySelector = "humidity";
+        private const string SeaLevelSelector = "sea_level";
+        private const string GroundLevel = "grnd_level";
 
-        public TemperatureObj Temperature { get { return temp; } }
-        public double Pressure { get { return pressure; } }
-        public double Humdity { get { return humidity; } }
-        public double SeaLevelAtm { get { return sea_level; } }
-        public double GroundLevelAtm { get { return grnd_level; } }
+        public Temperature Temperature { get; private set; }
+        public double Pressure { get; private set; }
+        public double Humdity { get; private set; }
+        public double SeaLevelAtm { get; private set; }
+        public double GroundLevelAtm { get; private set; }
 
         public Main(JToken mainData)
         {
-            temp = new TemperatureObj(double.Parse(mainData.SelectToken("temp").ToString()),
-                double.Parse(mainData.SelectToken("temp_min").ToString()), double.Parse(mainData.SelectToken("temp_max").ToString()));
-            pressure = double.Parse(mainData.SelectToken("pressure").ToString());
-            humidity = double.Parse(mainData.SelectToken("humidity").ToString());
-            if (mainData.SelectToken("sea_level") != null)
-                sea_level = double.Parse(mainData.SelectToken("sea_level").ToString());
-            if (mainData.SelectToken("grnd_level") != null)
-                grnd_level = double.Parse(mainData.SelectToken("grnd_level").ToString());
-        }
+            Temperature = new Temperature(double.Parse(mainData.SelectToken(Temp).ToString()),
+                double.Parse(mainData.SelectToken(TempMin).ToString()), double.Parse(mainData.SelectToken(TempMax).ToString()));
 
-        public class TemperatureObj
-        {
-            private double current_kel_temp, temp_kel_min, temp_kel_max;
-            private double current_cel_temp, temp_cel_min, temp_cel_max;
+            Pressure = double.Parse(mainData.SelectToken(PressureSelector).ToString());
+            Humdity = double.Parse(mainData.SelectToken(HumiditySelector).ToString());
 
-            public double CelsiusCurrent { get { return current_cel_temp; } }
-            public double FahrenheitCurrent { get { return convertToFahrenheit(current_cel_temp); } }
-            public double KelvinCurrent { get { return current_kel_temp; } }
-            public double CelsiusMinimum { get { return temp_cel_min; } }
-            public double CelsiusMaximum { get { return temp_cel_max; } }
-            public double FahrenheitMinimum { get { return convertToFahrenheit(temp_cel_min); } }
-            public double FahrenheitMaximum { get { return convertToFahrenheit(temp_cel_max); } }
-            public double KelvinMinimum { get { return temp_kel_min; } }
-            public double KelvinMaximum { get { return temp_kel_max; } }
+            if (mainData.SelectToken(SeaLevelSelector) != null)
+                SeaLevelAtm = double.Parse(mainData.SelectToken(SeaLevelSelector).ToString());
 
-            public TemperatureObj(double temp, double min, double max)
-            {
-                current_kel_temp = temp;
-                temp_kel_min = min;
-                temp_kel_max = max;
-                current_cel_temp = convertToCelsius(current_kel_temp);
-                temp_cel_min = convertToCelsius(temp_kel_min);
-                temp_cel_max = convertToCelsius(temp_kel_max);
-            }
-
-            private double convertToFahrenheit(double celsius)
-            {
-                return Math.Round(((9.0 / 5.0) * celsius) + 32, 3);
-            }
-
-            private double convertToCelsius(double kelvin)
-            {
-                return Math.Round(kelvin - 273.15, 3);
-            }
+            if (mainData.SelectToken(GroundLevel) != null)
+                GroundLevelAtm = double.Parse(mainData.SelectToken(GroundLevel).ToString());
         }
     }
 }

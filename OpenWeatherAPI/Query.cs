@@ -9,62 +9,74 @@ namespace OpenWeatherAPI
 {
     public class Query
     {
-        private bool validRequest;
-        private Coord coord;
-        private List<Weather> weathers = new List<Weather>();
-        private string baseStr;
-        private Main main;
-        private double visibility;
-        private Wind wind;
-        private Rain rain;
-        private Snow snow;
-        private Clouds clouds;
-        private Sys sys;
-        private int id;
-        private string name;
-        private int cod;
+        private const string BaseAdress = "http://api.openweathermap.org/data/2.5/";
+        private const string ValidCod = "200";
+        private const string COD = "cod";
+        private const string CoordSelector = "coord";
+        private const string WeatherSelector = "weather";
+        private const string BaseSelector = "base";
+        private const string MainSelector = "main";
+        private const string VisibilitySelector = "visibility";
+        private const string WindSelector = "wind";
+        private const string RaidSelector = "raid";
+        private const string SnowSelector = "snow";
+        private const string CloudsSelector = "clouds";
+        private const string SysSelector = "sys";
+        private const string IdSelector = "id";
+        private const string NameSelector = "name";
+        private const string CODSelector = "cod";
 
-        public bool ValidRequest { get { return validRequest; } }
-        public Coord Coord { get { return coord; } }
-        public List<Weather> Weathers { get { return weathers; } }
-        public string Base { get { return baseStr; } }
-        public Main Main { get { return main; } }
-        public double Visibility { get { return visibility; } }
-        public Wind Wind { get { return wind; } }
-        public Rain Rain { get { return rain; } }
-        public Snow Snow { get { return snow; } }
-        public Clouds Clouds { get { return clouds; } }
-        public Sys Sys { get { return sys; } }
-        public int ID { get { return id; } }
-        public string Name { get { return name; } }
-        public int Cod { get { return cod; } }
+        public bool ValidRequest { get; private set; }
+        public string Base { get; private set; }
+        public Coord Coord { get; private set; }
+        public List<Weather> Weathers { get; private set; }
+        public Main Main { get; private set; }
+        public double Visibility { get; private set; }
+        public Wind Wind { get; private set; }
+        public Rain Rain { get; private set; }
+        public Snow Snow { get; private set; }
+        public Clouds Clouds { get; private set; }
+        public Sys Sys { get; private set; }
+        public int ID { get; private set; }
+        public string Name { get; private set; }
+        public int Cod { get; private set; }
 
         public Query(string apiKey, string queryStr)
         {
-            JObject jsonData = JObject.Parse(new System.Net.WebClient().DownloadString(string.Format("http://api.openweathermap.org/data/2.5/weather?appid={0}&q={1}", apiKey, queryStr)));
-            if(jsonData.SelectToken("cod").ToString() == "200")
+            Weathers = new List<Weather>();
+
+            JObject jsonData = JObject.Parse(new System.Net.WebClient().DownloadString(string.Format(Query.BaseAdress + "weather?appid={0}&q={1}", apiKey, queryStr)));
+            if (jsonData.SelectToken(COD).ToString() == Query.ValidCod)
             {
-                validRequest = true;
-                coord = new Coord(jsonData.SelectToken("coord"));
-                foreach (JToken weather in jsonData.SelectToken("weather"))
-                    weathers.Add(new Weather(weather));
-                baseStr = jsonData.SelectToken("base").ToString();
-                main = new Main(jsonData.SelectToken("main"));
-                if(jsonData.SelectToken("visibility") != null)
-                    visibility = double.Parse(jsonData.SelectToken("visibility").ToString());
-                wind = new Wind(jsonData.SelectToken("wind"));
-                if(jsonData.SelectToken("raid") != null)
-                    rain = new Rain(jsonData.SelectToken("rain"));
-                if (jsonData.SelectToken("snow") != null)
-                    snow = new Snow(jsonData.SelectToken("snow"));
-                clouds = new Clouds(jsonData.SelectToken("clouds"));
-                sys = new Sys(jsonData.SelectToken("sys"));
-                id = int.Parse(jsonData.SelectToken("id").ToString());
-                name = jsonData.SelectToken("name").ToString();
-                cod = int.Parse(jsonData.SelectToken("cod").ToString());
-            } else
+                ValidRequest = true;
+                Coord = new Coord(jsonData.SelectToken(CoordSelector));
+
+                foreach (JToken weather in jsonData.SelectToken(WeatherSelector))
+                    Weathers.Add(new Weather(weather));
+
+                Base = jsonData.SelectToken(BaseSelector).ToString();
+                Main = new Main(jsonData.SelectToken(MainSelector));
+
+                if (jsonData.SelectToken(VisibilitySelector) != null)
+                    Visibility = double.Parse(jsonData.SelectToken(VisibilitySelector).ToString());
+
+                Wind = new Wind(jsonData.SelectToken(WindSelector));
+
+                if (jsonData.SelectToken(RaidSelector) != null)
+                    Rain = new Rain(jsonData.SelectToken(RaidSelector));
+
+                if (jsonData.SelectToken(SnowSelector) != null)
+                    Snow = new Snow(jsonData.SelectToken(SnowSelector));
+
+                Clouds = new Clouds(jsonData.SelectToken(CloudsSelector));
+                Sys = new Sys(jsonData.SelectToken(SysSelector));
+                ID = int.Parse(jsonData.SelectToken(IdSelector).ToString());
+                Name = jsonData.SelectToken(NameSelector).ToString();
+                Cod = int.Parse(jsonData.SelectToken(CODSelector).ToString());
+            }
+            else
             {
-                validRequest = false;
+                ValidRequest = false;
             }
         }
     }

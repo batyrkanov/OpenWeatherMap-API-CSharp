@@ -9,13 +9,13 @@ namespace OpenWeatherAPI
 {
     public class Clouds
     {
-        private double all;
+        private const string AllSelector = "all";
 
-        public double All { get { return all; } }
+        public double All { get; private set; }
 
         public Clouds(JToken cloudsData)
         {
-            all = double.Parse(cloudsData.SelectToken("all").ToString());
+            All = double.Parse(cloudsData.SelectToken(AllSelector).ToString());
         }
     }
 }
